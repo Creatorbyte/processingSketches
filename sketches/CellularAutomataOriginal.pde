@@ -1,3 +1,9 @@
+/*
+my failed first attempt at conway's game of life
+I probably wont fix it since i made a better implementation. It isnt right, but it looks cool the way it is!
+
+*/
+
 cell[][] cells;
 int size = 5;
 int rows; 
