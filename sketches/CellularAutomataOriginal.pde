@@ -1,97 +1,122 @@
-/*
-my failed first attempt at conway's game of life
-I probably wont fix it since i made a better implementation. It isnt right, but it looks cool the way it is!
+//by Creatorbyte
 
-*/
-
-cell[][] cells;
-int size = 5;
+int[][] cells;//make an array of the states since they are the most important value. there is no need for arrayLists or object classs
+int size = 12;
 int rows; 
 int cols;
+boolean pause = false;
 
 void setup() {
-   //initialize arraylist
-   size(1000, 1000);
+   size(displayWidth, displayWidth);
+   //fullScreen();
+   rows = int(width/size)+2;
+   cols = int(height/size)+2;
+   cells = new int[rows][cols];
    
-   rows = int(width/size)-1;
-   cols = int(height/size)-1;
-   cells = new cell[rows][cols];
-   noStroke();
+   
    for(int i=0;i<rows; i++){
       for(int j=0;j<cols;j++){
-        //create a new brick
-        int st = floor(random(2));
-        cells[i][j] = new cell(i*size, j*size, st, i, j);
+       // cells[i][j] = floor(random(2));
       }
    }
-   
 }
+
+int checkNeighbors(int [][]grid, int x, int y) {
+  int sum = 0;
+  for (int i = -1; i < 2; i++) {
+    for (int j = -1; j < 2; j++) {
+      int col = (x + i + cols) % cols;
+      int row = (y + j + rows) % rows;
+      sum += grid[col][row];
+    }
+  }
+  sum -= grid[x][y];
+  return sum;
+}
+
+void mouseDragged(){
+
+  int row = floor(mouseX/size);
+  int col = floor(mouseY/size);
+  try{
+    if(cells[row][col] != 1){
+    cells[row][col] = 1;
+    
+    } else {
+    cells[row][col] =0;
+    }
+  } catch(Exception e) {
+    print("Tried to place cell out of bounds!");
+  }
+}
+
+void mousePressed(){
+
+  int row = int(mouseX/size);
+  int col = int(mouseY/size);
+   
+  if(cells[row][col] != 1){
+  cells[row][col] = 1;
+  
+  } else {
+  cells[row][col] =0;
+  }
+}
+
+void keyPressed(){
+    if (key == 'R' || key == 'r') {
+       for(int i=0;i<rows; i++){
+      for(int j=0;j<cols;j++){
+        cells[i][j] = 0;
+      }
+     }
+    }else if (key == 'f' || key == 'F') {
+       for(int i=0;i<rows; i++){
+      for(int j=0;j<cols;j++){
+        cells[i][j] = floor(random(2));
+      }
+   }}
+    
+   if (pause == false && (key == 'P' || key == 'p')) {
+      pause = true;
+    } else if (pause == true){
+    pause = false;
+    }
+}
+
 void draw() {
-   background(0);
+  
+   background(218.0, 209.0, 255);
+   noStroke();
    
    for(int i=0;i<rows; i++){
       for(int j=0; j<cols;j++){
-        cell c = cells[i][j];
-        c.rend();
-        c.update();
-      }
-    }
-   
-}
-class cell{
-   float xpos;
-   float ypos;
-   int state;
-   int ix = 0;
-   int jx = 0;
-   cell me = this;
-   int neighbors = 0;
-   
-   cell(int x,int y,int s, int i, int j){
-      xpos = x;
-      ypos = y;
-      state = s;
-      ix = i;
-      jx = j;
-   }
-   
-   int getState(){
-      return this.state;
-   }
-   
-   int checkNeighbors() {
-      int sum = 0;
-      for (int i = -1; i <= 1; i++) {
-        for (int j = -1; j <= 1; j++) {
-          sum += cells[(ix + i + cols) % cols][(jx + j + rows) % rows].getState();
+        if(cells[i][j]==1){
+          fill(204.0, 250, 223);
+          rect((i*size),(j*size), size, size);
         }
       }
-      sum -= cells[ix][jx].getState();//subtact this cell since we dont count as a neighbor
-      return sum;
- }
-   
-   void update(){
-     
-     int NN = checkNeighbors();
-     
-     if (state == 0 && NN == 3) {
-        cells[ix][jx].state = 1;
-      } else if (state == 1 && (NN < 2 || NN > 3)) {
-        cells[ix][jx].state = 0;
+    }
+   int[][] next = new int[cols][rows];
+
+  if(pause != true){
+  for (int i = 0; i < cols; i++) {
+    for (int j = 0; j < rows; j++) {
+      int state = cells[i][j];
+      // Count living neighbors
+      int sum = 0;
+      int neighbors = checkNeighbors(cells, i, j);
+
+      if (state == 0 && neighbors == 3) {
+        next[i][j] = 1;
+      } else if (state == 1 && (neighbors < 2 || neighbors > 3)) {
+        next[i][j] = 0;
       } else {
-        cells[ix][jx].state = cells[ix][jx].state;
-      return;
+        next[i][j] = state;
       }
-   }
-   
-   void rend(){
-      
-     if(state < 1){
-      fill(0,155,0);
-     } else {
-       fill(0,255,0);
-     }
-       rect(xpos,ypos,size,size);
-   }
-   
+
+    }
+  }
+  cells = next;
+  }
 }
